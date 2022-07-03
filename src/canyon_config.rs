@@ -1,11 +1,17 @@
 use serde::Deserialize;
 
+/// Loads the data defined in the Canyon configuration file, returning
+/// a [`CanyonConfig`] instance with all the available elements
+pub fn load() -> CanyonConfig<'static> {
+    todo!()
+}
+
 /// Stores all the types that holds the configuration retrieved on every section on the
 /// configuration file.
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct CanyonConfig<'a> {
     #[serde(borrow)]
-    server: ServerConfig<'a>
+    pub server: ServerConfig<'a>
 }
 
 /// Retrieves the user defined properties on the configuration file for the
@@ -24,8 +30,8 @@ fn load_server_config() {
     assert_eq!(config.server.port, "7878");
 }
 /// ```
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct ServerConfig<'a> {
-    ip: &'a str,
-    port: &'a str,
+    pub ip: &'a str,
+    pub port: &'a str,
 }

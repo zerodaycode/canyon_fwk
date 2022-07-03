@@ -1,7 +1,7 @@
 use std::fs;
 use serde::Deserialize;
 
-const CONFIG_FILE_IDENTIFIER: &'static str = "canyon.rs";
+const CONFIG_FILE_IDENTIFIER: &'static str = "canyon.toml";
 
 /// Loads the data defined in the Canyon configuration file, returning
 /// an [`String`] with the content of the file

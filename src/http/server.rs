@@ -16,7 +16,7 @@ impl HttpServer {
     /// and will start listening for incoming *TCP* connections.
     pub fn run(config: CanyonConfig) {
         let listener = TcpListener::bind(
-            format!("{:?}:{:?}", "127.0.0.1", "7878")
+            format!("{}:{}", config.server.ip, config.server.port)
         ).unwrap(); // TODO handle error
 
         for stream in listener.incoming() {

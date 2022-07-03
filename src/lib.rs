@@ -12,7 +12,17 @@ mod http;
 /// for handling the client-server connections.
 pub fn fire() {
     // Retrieves the user defined config from the config-file
-    let config: CanyonConfig = canyon_config::load();
-    // Loads an instance of the HttpServer
+    let config_data: String = canyon_config::load();
+    // Map the content on the str to the Canyon configuration struct.
+    let config: CanyonConfig = toml::from_str(config_data.as_str())
+        .expect("Error generating the configuration for Canyon");
+    // Starts the event loop of the HttpServer
     http::server::HttpServer::run(config);
+
+    // TODO For further discussion. What about replicate different server instances
+    // on different threads? Every server w'd be preceded by a central server, that just
+    // pass data to the rest, acting as a load balancer.
+    // This w'd be like a multipod configuration, simulating a real cluster scenario
+    // (the one that it's typically provided by the deployment platforms) but directly provided
+    // in the Canyon framework.
 }

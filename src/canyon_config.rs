@@ -1,9 +1,13 @@
+use std::fs;
 use serde::Deserialize;
 
+const CONFIG_FILE_IDENTIFIER: &'static str = "canyon.rs";
+
 /// Loads the data defined in the Canyon configuration file, returning
-/// a [`CanyonConfig`] instance with all the available elements
-pub fn load() -> CanyonConfig<'static> {
-    todo!()
+/// an [`String`] with the content of the file
+pub fn load() -> String {
+    fs::read_to_string(CONFIG_FILE_IDENTIFIER)
+        .expect("Error opening or reading the Canyon configuration file")
 }
 
 /// Stores all the types that holds the configuration retrieved on every section on the

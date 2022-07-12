@@ -1,18 +1,22 @@
-use crate::canyon_config::CanyonConfig;
+use crate::config::CanyonConfig;
 
-mod canyon_config;
+mod config;
 
 /// Contains the public APIs for working with the base set of features
 /// provided by The Canyon Framework
 mod http;
 
-/// The entry point of any Canyon program.
+/// The entry point of any Canyon program. 
 ///
 /// Sets up the initial environment for run the embedded http server
 /// for handling the client-server connections.
+/// 
+/// The fire() function acts 
+/// as a facede, abstracting away the need to expose the internal state
+/// of the configuration loader and the server.
 pub fn fire() {
     // Retrieves the user defined config from the config-file
-    let config_data: String = canyon_config::load();
+    let config_data: String = config::load();
     // Map the content on the str to the Canyon configuration struct.
     let config: CanyonConfig = toml::from_str(config_data.as_str())
         .expect("Error generating the configuration for Canyon");

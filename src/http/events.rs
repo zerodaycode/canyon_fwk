@@ -1,50 +1,37 @@
 use std::net::TcpStream;
 
-use crate::core::{net::{Request, NetworkStream}, parsers::Parseable};
+use crate::core::{net::{NetworkStream}, parsers::Parseable};
 
 use super::methods::HttpMethod;
+
+pub trait Request: NetworkStream {}
+
 
 /// Represents the structure of some kind of Http TCP request
 /// 
 /// TODO Docs
-pub struct HttpRequest {
+pub struct HttpRequest<'a> {
     pub verb: HttpMethod,
-    pub uri: &'static str,
-    pub http_version: &'static str,
-    pub headers: [&'static str; 10],  // TODO replace for dyn allocate type?¿
-    pub body: &'static str
+    pub uri: &'a str,
+    pub http_version: &'a str,
+    pub headers: &'a [&'a str],  // TODO replace for dyn allocate type?¿
+    pub body: &'a str
 }
 
-impl HttpRequest {
-    pub fn new(request: &[u8]) -> Self {
+
+impl<'a> HttpRequest<'a> {
+    pub fn new<T: Request>(request: &mut T) -> Self {
         // Call parse to validate the input data
-
+        let mut buffer = [0; 1024];  // TODO Handle the buffer accordingly
+        request.read(&mut buffer).unwrap();  // TODO Handle the possible error on io::Write
+        println!("Request: {}", String::from_utf8_lossy(&buffer[..]));
         /// ...
-        Self { verb: (), uri: (), http_version: (), headers: (), body: () }
-    }
-}
-
-impl Request<Self> for HttpRequest {}
-
-impl NetworkStream for HttpRequest {}
-
-impl std::io::Write for HttpRequest {
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        todo!()
-    }
-
-    fn flush(&mut self) -> std::io::Result<()> {
-        todo!()
-    }
-}
-impl std::io::Read for HttpRequest {
-    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
-        TcpStream::read(&mut self, buf)
-    }
-}
-
-impl Parseable for HttpRequest {
-    fn parse<'a>(&self, content: &'a str) {
-        todo!()
+        Self { 
+            verb: HttpMethod::GET, 
+            uri: "https://somecosa.url", 
+            http_version: "HTTP/1.1", 
+            headers: &["no-headers-thing"], 
+            body: "" 
+        }
     }
 }

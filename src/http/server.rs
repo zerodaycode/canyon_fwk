@@ -1,6 +1,6 @@
-use std::{net::{TcpListener, TcpStream}, io::Read};
-use super::events::HttpRequest;
-use crate::{CanyonConfig, core::net::{NetworkStream, Request}};
+use std::{net::{TcpListener, TcpStream}, io::{Read, Write}};
+use super::events::{HttpRequest, Request};
+use crate::{CanyonConfig, core::{net::NetworkStream, parsers::Parseable}};
 
 /// The Canyon built-in http server.
 ///
@@ -22,31 +22,25 @@ impl HttpServer {
 
         let listener = TcpListener::bind(
             format!("{}:{}", config.server.ip, config.server.port)
-        ).unwrap(); // TODO handle error
+        ).unwrap(); // TODO handle binding error
 
         for stream in listener.incoming() {
-            let stream = stream.unwrap();
+            let stream = stream.unwrap(); // TODO Handle client error
             HttpServer::handle_connection(stream)
         }
     }
 
     /// Convenient method to read the data coming from a Tcp event
-    fn handle_connection(mut stream: impl NetworkStream) {
-        let mut buffer = [0; 1024];  // TODO Handle the buffer accordingly
-        // to the incoming request
-    
-        stream.read(&mut buffer).unwrap();  // TODO Handle the possible error on io::Write
-    
-        println!("Request: {}", String::from_utf8_lossy(&buffer[..]));
-
-        // The request parse enters in action
-        let request: HttpRequest = HttpRequest::new(&buffer[..]);
-
+    /// 
+    /// TODO Generify this concept into an Struct, that it's associated fn
+    /// `handle_connection` receives objects that implements NetworkStream
+    fn handle_connection(mut stream: impl NetworkStream + Request) {
+        let http_req = HttpRequest::new(&mut stream);
         // --------------------- RESPONSE EVENTS -----------------------------
         let response = "HTTP/1.1 200 OK\r\n\r\n";
 
-        stream.write(response.as_bytes()).unwrap();
-        stream.flush().unwrap();
+        // stream.write(response.as_bytes()).unwrap();
+        // stream.flush().unwrap();
     }
 }
 

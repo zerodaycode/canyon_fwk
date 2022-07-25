@@ -1,4 +1,6 @@
-use crate::http::methods::HttpMethod;
+use crate::http::{methods::HttpMethod, events::Request};
+
+use super::net::NetworkStream;
 
 /// Type for defines contracts over parseable items
 /// 
@@ -6,5 +8,6 @@ use crate::http::methods::HttpMethod;
 /// it's a good candidate to be parseable, e.g. an Http request
 /// that flows to an Http server.
 pub trait Parseable {
-    fn parse<'a>(&self, content: &'a str);
+    fn parse<'a, T>(stream: &'a mut T) -> &'a dyn Request
+        where T: Parseable + Request;
 }

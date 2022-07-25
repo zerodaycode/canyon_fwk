@@ -1,4 +1,4 @@
-use crate::http::{methods::HttpMethod, events::Request};
+use crate::http::{types::HttpMethod, events::Request};
 
 use super::net::NetworkStream;
 

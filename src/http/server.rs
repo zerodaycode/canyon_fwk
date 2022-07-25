@@ -34,8 +34,8 @@ impl HttpServer {
     /// 
     /// TODO Generify this concept into an Struct, that it's associated fn
     /// `handle_connection` receives objects that implements NetworkStream
-    fn handle_connection(mut stream: impl NetworkStream + Request) {
-        let http_req = HttpRequest::from(&mut stream);
+    fn handle_connection(mut stream: impl NetworkStream) {
+        let http_req = HttpRequest::new(&mut stream);
         // --------------------- RESPONSE EVENTS -----------------------------
         let response = "HTTP/1.1 200 OK\r\n\r\n";
 

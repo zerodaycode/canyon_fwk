@@ -6,6 +6,9 @@ mod config;
 /// provided by The Canyon Framework
 mod http;
 
+/// TODO def for the types mod
+mod core;
+
 /// The entry point of any Canyon program. 
 ///
 /// Sets up the initial environment for run the embedded http server

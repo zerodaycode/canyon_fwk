@@ -11,7 +11,7 @@ use std::{error::Error, fmt};
 /// are shared by a group of them: e.g. a request method can be 
 /// safe, idempotent, or cacheable.
 /// 
-/// More info on [Http Methods](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
+/// More info on [Http Methods](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods)
 #[derive(Debug, PartialEq)]
 pub enum HttpMethod {
     GET,
@@ -42,6 +42,7 @@ impl HttpMethod {
     }
 }
 
+/// Represents an error when a non existent verb in a Http request it's found
 pub struct UnknownVerb<'a> {
     wrong_verb: &'a str
 }
@@ -54,6 +55,6 @@ impl fmt::Display for UnknownVerb<'_> {
 // Implement std::fmt::Debug for AppError
 impl fmt::Debug for UnknownVerb<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{{ Wrong verb: {}", self.wrong_verb)
+        write!(f, "Wrong verb: {}", self.wrong_verb)
     }
 }

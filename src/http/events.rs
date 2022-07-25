@@ -18,13 +18,10 @@ pub struct HttpRequest<'a> {
     pub body: &'a str
 }
 
-
 impl<'a> HttpRequest<'a> {
-    pub fn new<T: Request>(request: &mut T) -> Self {
+    pub fn new<T: Request>(request: &'a mut T) -> Self {
         // Call parse to validate the input data
-        let mut buffer = [0; 1024];  // TODO Handle the buffer accordingly
-        request.read(&mut buffer).unwrap();  // TODO Handle the possible error on io::Write
-        println!("Request: {}", String::from_utf8_lossy(&buffer[..]));
+        
         /// ...
         Self { 
             verb: HttpMethod::GET, 
@@ -34,4 +31,6 @@ impl<'a> HttpRequest<'a> {
             body: "" 
         }
     }
+
+    fn parse_http_method()
 }

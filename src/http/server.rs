@@ -1,6 +1,6 @@
-use std::{net::{TcpListener, TcpStream}, io::{Read, Write}};
-use super::events::{HttpRequest, Request};
-use crate::{CanyonConfig, core::{net::NetworkStream, parsers::Parseable}};
+use std::net::TcpListener;
+use super::events::HttpRequest;
+use crate::{CanyonConfig, core::net::NetworkStream};
 
 /// The Canyon built-in http server.
 ///

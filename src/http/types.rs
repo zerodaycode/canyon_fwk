@@ -1,4 +1,4 @@
-use std::{error::Error, fmt};
+use std::fmt::{self};
 
 /// Represents any valid Http method
 /// 
@@ -56,5 +56,16 @@ impl fmt::Display for UnknownVerb<'_> {
 impl fmt::Debug for UnknownVerb<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Wrong verb: {}", self.wrong_verb)
+    }
+}
+
+#[derive(Debug)]
+pub struct Uri {
+    pub uri: String
+}
+
+impl Uri {
+    pub fn new<'a>(uri: &'a str) -> Self {
+        Self { uri: uri.to_string() }
     }
 }

@@ -1,6 +1,4 @@
-use crate::http::{types::HttpMethod, events::Request};
-
-use super::net::NetworkStream;
+use crate::http::events::Request;
 
 /// Type for defines contracts over parseable items
 /// 

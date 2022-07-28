@@ -1,8 +1,7 @@
-use std::{net::TcpStream, borrow::Cow};
+use std::collections::HashMap;
 
-use crate::core::{net::{NetworkStream}, parsers::Parseable};
-
-use super::types::HttpMethod;
+use crate::core::net::{NetworkStream};
+use super::types::{HttpMethod, Uri};
 
 pub trait Request {}
 
@@ -11,63 +10,94 @@ pub trait Request {}
 /// 
 /// TODO Docs
 #[derive(Debug)]
-pub struct HttpRequest<'a> {
+pub struct HttpRequest {
     pub verb: HttpMethod,
-    pub uri: &'a str,
-    pub http_version: &'a str,
-    pub headers: &'a [&'a str],  // TODO replace for dyn allocate type?¿
-    pub body: &'a str
+    pub uri: Uri,
+    pub http_version: String,
+    pub headers: HashMap<String, String>,
+    pub body: String
 }
 
-impl Request for HttpRequest<'_> {}
+impl Request for HttpRequest {}
 
-impl<'a> HttpRequest<'a> {
-    pub fn new<T: NetworkStream>(stream: &'a mut T) -> Self {
+impl HttpRequest {
+    pub fn new<'a, T: NetworkStream>(stream: &'a mut T) -> Self {
         // Call parse to validate the input data
-        let mut buffer = [0; 1024];  // TODO Handle the buffer accordingly
-        // to the incoming request
+        let mut buffer = [0; 1024];  // TODO Handle the buffer accordingly to the incoming request
         stream.read(&mut buffer).unwrap();  // TODO Handle the possible error on io::Write
         let request_payload = String::from_utf8_lossy(&buffer[..]);  // let binding for longer live the slices
-        // print!("Request payload to parse: {:?}", request_payload);
 
         // Organize the request by first, splitting it by CRLF
         let mut sp = request_payload.split("\r\n");
-        // After this, the first element on the iterator contains the verb, uri and http version of the request
-        let method_uri_version = sp.next().unwrap_or_default().split_ascii_whitespace()
-            .collect::<Vec<&str>>();
-        println!("Method uri version: {:?}", &method_uri_version);
+        println!("Splitted: {:?}", &sp.clone().collect::<Vec<&str>>());
 
-        let body = &sp.last().unwrap();
-        print!("Body: {:?}", &body);
+        // After this, we take the first element on the iterator contains the verb, uri and http version of the request
+        let (verb, uri, version) = Self::parse_verb_uri_version(&mut sp);
+        println!("Method: {:?}, URI: {:?}, Version: {}", &verb, &uri, &version);
+        // Then, we get (not consume) the last element on the request, that is the body of the Http request
+        let body = sp.clone().last().unwrap();  // TODO Alternative to not clone the iterator?
 
-        let headers = &sp.collect::<Vec<&str>>();
+        let mut headers: HashMap<String, String> = HashMap::new();
+        let mut iter = sp.peekable();
 
-        // println!("Request payload consumed Headers: {:?}", &);
-        /// ...
+        while iter.peek() != None {
+            let next = iter.next();
+            if let Some(value_to_parse) = next {
+                let parts = value_to_parse.split(": ").collect::<Vec<&str>>();
+                let key = parts.get(0);
+                println!("Key: {:?}", &key);
+                if parts.len() == 2 {
+                    headers.insert(
+                        (*key.expect(&format!("Error getting the header definition: {:?}", &key)))
+                            .to_string(), 
+                        (*parts.get(1)
+                            .expect(&format!("Error getting the header value from: {:?}", &parts)))
+                            .to_string()
+                    );
+                }
+            } else { iter.next(); }
+        }
+
+        println!("Headers: {:?}", &headers);
+
         Self { 
-            verb: Self::parse_http_method(&method_uri_version), 
-            uri: "https://somecosa.url", 
-            http_version: "HTTP/1.1", 
-            headers: &["no-headers-thing"], 
-            body: "" 
+            verb: verb, 
+            uri: uri, 
+            http_version: version, 
+            headers: headers, 
+            body: body.to_string()
         }
     }
 
-    /// Parses http verbs TODO custom http response code if parsing fails
-    fn parse_http_method(payload: &[&str]) -> HttpMethod {
-        let verb = payload.get(0);
-        match verb {
-            Some(v) => match HttpMethod::from_str(*v) {
-                Ok(verb) => verb,
-                Err(_) => todo!(),
-            },
-            None => todo!(),
+    /// Method for parse the first three elements on an Http request
+    /// 
+    /// It returns a tuple containing the elements parsed and disgregated from the original 
+    /// Split<&str> iterator
+    fn parse_verb_uri_version<'b>(payload: &'b mut std::str::Split<&str>) -> (HttpMethod, Uri, String) {
+        let mut method_uri_version = payload.next()
+            .expect("Something wrong happened getting verb-uri-version")
+            .split_ascii_whitespace();
+
+        (
+            Self::parse_http_method(method_uri_version.next().unwrap()),
+            Self::parse_uri(method_uri_version.next().unwrap()),
+            method_uri_version.next().unwrap().to_string()
+        )
+    }
+
+    /// Parses an http verb from an Http request, returning an [`HttpMethod`] enum type
+    /// with a variant representing some valid Http Method
+    fn parse_http_method<'b>(payload: &'b str) -> HttpMethod {
+        match HttpMethod::from_str(payload) {
+            Ok(verb) => verb,
+            Err(_) => todo!(),
         }
     }
 
-    /// URI parser
-    fn parse_uri(payload: &Vec<String>) {
-
+    /// Parses and validates the URI resource from an Http Request
+    fn parse_uri<'b>(payload: &'b str) -> Uri {
+        Uri::new(payload)
+        // TODO Implement the URI parser
     }
 }
 
@@ -85,7 +115,7 @@ mod tests {
 
     #[test]
     fn test_http_method_parser() {
-        let http_method = HttpRequest::parse_http_method(&MOCKED_PAYLOAD);
+        let http_method = HttpRequest::parse_http_method(&MOCKED_PAYLOAD[0]);
         assert_eq!(http_method, HttpMethod::GET)
     }
 }

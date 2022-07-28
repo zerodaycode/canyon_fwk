@@ -2,8 +2,6 @@ use std::net::TcpStream;
 
 use crate::http::events::Request;
 
-use super::parsers::Parseable;
-
 /// Defines a type that represents some network connection
 pub trait NetworkStream: std::io::Read + std::io::Write {}
 

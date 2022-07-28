@@ -1,11 +1,21 @@
+use std::fs;
 use serde::Deserialize;
+
+const CONFIG_FILE_IDENTIFIER: &'static str = "canyon.toml";
+
+/// Loads the data defined in the Canyon configuration file, returning
+/// an [`String`] with the content of the file
+pub fn load() -> String {
+    fs::read_to_string(CONFIG_FILE_IDENTIFIER)
+        .expect("Error opening or reading the Canyon configuration file")
+}
 
 /// Stores all the types that holds the configuration retrieved on every section on the
 /// configuration file.
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct CanyonConfig<'a> {
     #[serde(borrow)]
-    server: ServerConfig<'a>
+    pub server: ServerConfig<'a>
 }
 
 /// Retrieves the user defined properties on the configuration file for the
@@ -24,8 +34,8 @@ fn load_server_config() {
     assert_eq!(config.server.port, "7878");
 }
 /// ```
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct ServerConfig<'a> {
-    ip: &'a str,
-    port: &'a str,
+    pub ip: &'a str,
+    pub port: &'a str,
 }

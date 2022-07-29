@@ -113,7 +113,7 @@ impl<'a> fmt::Debug for UnsupportedVersion<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Uri {
     pub uri: String
 }

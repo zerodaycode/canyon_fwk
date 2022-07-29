@@ -109,8 +109,13 @@ impl HttpRequest {
     }
 }
 
+
+/// Unit tests for the methods of the [`HttpRequest`]. Parser methods are the important ones.
+/// 
+/// TODO Improve test when the result of parsing w'd be a Result<T, E>, representing the possible
+/// failure parsing by an incorrect or unsupport value
 #[cfg(test)]
-mod tests {
+mod http_tests {
     use super::*;
 
     const MOCKED_PAYLOAD: &[&str] = &[
@@ -125,5 +130,17 @@ mod tests {
     fn test_http_method_parser() {
         let http_method = HttpRequest::parse_http_method(&MOCKED_PAYLOAD[0]);
         assert_eq!(http_method, HttpMethod::GET)
+    }
+
+    #[test]
+    fn test_http_uri_parser() {
+        let uri = HttpRequest::parse_uri(&MOCKED_PAYLOAD[1]);
+        assert_eq!(uri.uri.as_str(), *&MOCKED_PAYLOAD[1]);  // TODO Still dummy 'cause not fully impl the Uri parser
+    }
+
+    #[test]
+    fn test_http_version_parser() {
+        let http_version = HttpRequest::parse_http_version(&MOCKED_PAYLOAD[2]);
+        assert_eq!(http_version, HttpVersion::V1_1)
     }
 }

@@ -37,7 +37,7 @@ impl HttpRequest {
         // Then, we get (not consume) the last element on the request, that is the body of the Http request
         let body = sp.clone().last().unwrap();  // TODO Alternative to not clone the iterator?
         // Finally, we consume the intermediate elements, the remaining ones in the iterator
-        let mut headers = Self::parse_http_request_headers(&mut sp);
+        let headers = Self::parse_http_request_headers(&mut sp);
 
         Self { 
             verb: verb, 
@@ -113,7 +113,7 @@ impl HttpRequest {
                 }
             } else { iter.next(); }
         }
-        
+
         headers
     }
 }

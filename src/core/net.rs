@@ -28,13 +28,13 @@ impl Request for TcpStream {}
 /// 
 /// T where represents some kind of custom user-defined type for an net io
 /// response (should be serializable, depending on the response type)
-pub struct Response<T: Request> {
+pub struct _Response<T: Request> {
     pub request: T
 }
 
-impl<T: Request> Response<T> {
+impl<T: Request> _Response<T> {
     /// Returns an Http response for a valid Http request
-    pub fn from_request<'a, R>(request: &'a dyn Request) -> R {
+    pub fn _from_request<'a, R>(_request: &'a dyn Request) -> R {
         todo!()
     }
 }

@@ -1,6 +1,6 @@
 use crate::http::events::Request;
 
-/// Type for defines contracts over parseable items
+/// Type that defines an interface for parseable items
 /// 
 /// In the net context, usually a network event over a server
 /// it's a good candidate to be parseable, e.g. an Http request

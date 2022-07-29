@@ -36,29 +36,8 @@ impl HttpRequest {
         println!("Method: {:?}, URI: {:?}, Version: {:?}", &verb, &uri, &version);
         // Then, we get (not consume) the last element on the request, that is the body of the Http request
         let body = sp.clone().last().unwrap();  // TODO Alternative to not clone the iterator?
-
-        let mut headers: HashMap<String, String> = HashMap::new();
-        let mut iter = sp.peekable();
-
-        while iter.peek() != None {
-            let next = iter.next();
-            if let Some(value_to_parse) = next {
-                let parts = value_to_parse.split(": ").collect::<Vec<&str>>();
-                let key = parts.get(0);
-                println!("Key: {:?}", &key);
-                if parts.len() == 2 {
-                    headers.insert(
-                        (*key.expect(&format!("Error getting the header definition: {:?}", &key)))
-                            .to_string(), 
-                        (*parts.get(1)
-                            .expect(&format!("Error getting the header value from: {:?}", &parts)))
-                            .to_string()
-                    );
-                }
-            } else { iter.next(); }
-        }
-
-        println!("Headers: {:?}", &headers);
+        // Finally, we consume the intermediate elements, the remaining ones in the iterator
+        let mut headers = Self::parse_http_request_headers(&mut sp);
 
         Self { 
             verb: verb, 
@@ -107,6 +86,36 @@ impl HttpRequest {
             Err(_) => todo!()
         }
     }
+
+    /// Parses the elements in the iterator that contains the Http request in order to get
+    /// the Http headers defined in it, by taking the elements in the sp arg, splitting the
+    /// &str remaining there.
+    /// 
+    /// Every &str it's splitted by (": "), ensuring that the elements are valid ones to have a 
+    /// complete definition of an Http header.
+    fn parse_http_request_headers<'b>(sp: &'b mut std::str::Split<&str>) -> HashMap<String, String> {
+        let mut headers: HashMap<String, String> = HashMap::new();
+        let mut iter = sp.peekable();
+
+        while iter.peek() != None {
+            let next = iter.next();
+            if let Some(value_to_parse) = next {
+                let parts = value_to_parse.split(": ").collect::<Vec<&str>>();
+                let key = parts.get(0);
+                if parts.len() == 2 {
+                    headers.insert(
+                        (*key.expect(&format!("Error getting the header definition: {:?}", &key)))
+                            .to_string(), 
+                        (*parts.get(1)
+                            .expect(&format!("Error getting the header value from: {:?}", &parts)))
+                            .to_string()
+                    );
+                }
+            } else { iter.next(); }
+        }
+        
+        headers
+    }
 }
 
 
@@ -122,7 +131,7 @@ mod http_tests {
         "GET",
         "http://mocked_uri.net",
         "HTTP/1.1",
-        "no-headers-thing",
+        "some_thing_to_mock\r\nheader-thing: some-header-value",
         ""
     ];
 
@@ -142,5 +151,12 @@ mod http_tests {
     fn test_http_version_parser() {
         let http_version = HttpRequest::parse_http_version(&MOCKED_PAYLOAD[2]);
         assert_eq!(http_version, HttpVersion::V1_1)
+    }
+
+    #[test]
+    fn test_http_headers_parser() {
+        let http_headers = HttpRequest::parse_http_request_headers(&mut MOCKED_PAYLOAD[3].split("\r\n"));
+        assert!(http_headers.contains_key("header-thing"));
+        assert_eq!(http_headers.get("header-thing"), Some(&"some-header-value".to_string()));
     }
 }

@@ -1,3 +1,4 @@
-pub(crate) mod server;
+pub mod server;
 pub mod types;
+pub use types::{HttpMethod, HttpVersion};
 pub mod events;

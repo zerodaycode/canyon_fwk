@@ -15,7 +15,7 @@ pub struct HttpRequest {
     pub uri: Uri,
     pub http_version: HttpVersion,
     pub headers: HashMap<String, String>,
-    pub body: String
+    pub body: Option<String>
 }
 
 impl Request for HttpRequest {}
@@ -29,13 +29,10 @@ impl HttpRequest {
 
         // Organize the request by first, splitting it by CRLF
         let mut sp = request_payload.split("\r\n");
-        println!("Splitted: {:?}", &sp.clone().collect::<Vec<&str>>());
-
         // After this, we take the first element on the iterator contains the verb, uri and http version of the request
         let (verb, uri, version) = Self::parse_verb_uri_version(&mut sp);
-        println!("Method: {:?}, URI: {:?}, Version: {:?}", &verb, &uri, &version);
         // Then, we get (not consume) the last element on the request, that is the body of the Http request
-        let body = sp.clone().last().unwrap();  // TODO Alternative to not clone the iterator?
+        let body = Self::parse_http_request_body(sp.clone().last().unwrap());  // TODO Alternative to not clone the iterator?
         // Finally, we consume the intermediate elements, the remaining ones in the iterator
         let headers = Self::parse_http_request_headers(&mut sp);
 
@@ -44,7 +41,7 @@ impl HttpRequest {
             uri: uri, 
             http_version: version, 
             headers: headers, 
-            body: body.to_string()
+            body: body
         }
     }
 
@@ -116,6 +113,18 @@ impl HttpRequest {
 
         headers
     }
+
+
+    /// Parses the Http request body, anullating those ones that are zero-padded ones or discarding the empty ones
+    /// TODO Probably the body should be converted to some T type if the headers contains, for example, the application/json?
+    /// Some some type should be impl over the response of this method, generificating Self into T,
+    /// or better, into custom type, like body, so the return type of the method could be
+    /// something like Option<Body<T>>
+    fn parse_http_request_body<'b>(body: &'b str) -> Option<String> {
+        /// First, discard the non desired elemments
+        if body.starts_with("\0") || body.is_empty() { return None; }
+        Some(body.to_string())
+    }
 }
 
 
@@ -132,7 +141,7 @@ mod http_tests {
         "http://mocked_uri.net",
         "HTTP/1.1",
         "some_thing_to_mock\r\nheader-thing: some-header-value",
-        ""
+        "\0"
     ];
 
     #[test]
@@ -158,5 +167,18 @@ mod http_tests {
         let http_headers = HttpRequest::parse_http_request_headers(&mut MOCKED_PAYLOAD[3].split("\r\n"));
         assert!(http_headers.contains_key("header-thing"));
         assert_eq!(http_headers.get("header-thing"), Some(&"some-header-value".to_string()));
+    }
+
+    #[test]
+    fn test_http_body_parser() {
+        let body = HttpRequest::parse_http_request_body(&MOCKED_PAYLOAD[4]);
+        let body_2 = HttpRequest::parse_http_request_body("");
+        let body_3 = HttpRequest::parse_http_request_body("http-body");
+        
+        assert_eq!(body, None);
+        assert_eq!(body_2, None);
+        assert_eq!(body_3, Some("http-body".to_string()));
+
+        assert_ne!(body_3, Some("http-bodybodybody".to_string()));
     }
 }

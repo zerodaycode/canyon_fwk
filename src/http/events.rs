@@ -1,19 +1,19 @@
 use std::collections::HashMap;
 
 use crate::core::net::{NetworkStream};
-use super::types::{HttpMethod, Uri};
+use super::types::{HttpMethod, Uri, HttpVersion};
 
 pub trait Request {}
 
 
-/// Represents the structure of some kind of Http TCP request
+/// Represents the structure of an Http request
 /// 
 /// TODO Docs
 #[derive(Debug)]
 pub struct HttpRequest {
     pub verb: HttpMethod,
     pub uri: Uri,
-    pub http_version: String,
+    pub http_version: HttpVersion,
     pub headers: HashMap<String, String>,
     pub body: String
 }
@@ -33,7 +33,7 @@ impl HttpRequest {
 
         // After this, we take the first element on the iterator contains the verb, uri and http version of the request
         let (verb, uri, version) = Self::parse_verb_uri_version(&mut sp);
-        println!("Method: {:?}, URI: {:?}, Version: {}", &verb, &uri, &version);
+        println!("Method: {:?}, URI: {:?}, Version: {:?}", &verb, &uri, &version);
         // Then, we get (not consume) the last element on the request, that is the body of the Http request
         let body = sp.clone().last().unwrap();  // TODO Alternative to not clone the iterator?
 
@@ -73,7 +73,7 @@ impl HttpRequest {
     /// 
     /// It returns a tuple containing the elements parsed and disgregated from the original 
     /// Split<&str> iterator
-    fn parse_verb_uri_version<'b>(payload: &'b mut std::str::Split<&str>) -> (HttpMethod, Uri, String) {
+    fn parse_verb_uri_version<'b>(payload: &'b mut std::str::Split<&str>) -> (HttpMethod, Uri, HttpVersion) {
         let mut method_uri_version = payload.next()
             .expect("Something wrong happened getting verb-uri-version")
             .split_ascii_whitespace();
@@ -81,7 +81,7 @@ impl HttpRequest {
         (
             Self::parse_http_method(method_uri_version.next().unwrap()),
             Self::parse_uri(method_uri_version.next().unwrap()),
-            method_uri_version.next().unwrap().to_string()
+            Self::parse_http_version(method_uri_version.next().unwrap())
         )
     }
 
@@ -98,6 +98,14 @@ impl HttpRequest {
     fn parse_uri<'b>(payload: &'b str) -> Uri {
         Uri::new(payload)
         // TODO Implement the URI parser
+    }
+
+    /// Parses and validates the version of the incoming Http request
+    fn parse_http_version<'b>(payload: &'b str) -> HttpVersion {
+        match HttpVersion::from_str(payload) {
+            Ok(version) => version,
+            Err(_) => todo!()
+        }
     }
 }
 

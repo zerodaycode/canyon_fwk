@@ -37,7 +37,13 @@ impl HttpServer {
     /// TODO Generify this concept into an Struct, that it's associated fn
     /// `handle_connection` receives objects that implements NetworkStream
     fn handle_connection(mut stream: impl NetworkStream) {
-        let http_req = HttpRequest::new(&mut stream);
+        // Call parse to validate the input data
+        let mut buffer = [0; 1024];  // TODO Handle the buffer accordingly to the incoming request
+        stream.read(&mut buffer).unwrap();  // TODO Handle the possible error on io::Write
+        let request_payload = String::from_utf8_lossy(&buffer[..]);  // let binding for longer live the slices
+        // Organize the request by first, splitting it by CRLF
+        let sp = request_payload.split("\r\n");
+        let http_req = HttpRequest::new(sp);
         println!("Http request: {:?}", http_req);
         // --------------------- RESPONSE EVENTS -----------------------------
         let response = "HTTP/1.1 200 OK\r\n\r\n";

@@ -1,4 +1,4 @@
-use crate::http::events::Request;
+use super::net::Request;
 
 /// Type that defines an interface for parseable items
 /// 

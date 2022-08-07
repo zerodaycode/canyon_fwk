@@ -1,10 +1,7 @@
 use std::collections::HashMap;
 
-use crate::core::net::{NetworkStream};
+use crate::core::net::{NetworkStream, Request};
 use super::types::{HttpMethod, Uri, HttpVersion};
-
-pub trait Request {}
-
 
 /// Represents the structure of an Http request
 /// 
@@ -18,7 +15,14 @@ pub struct HttpRequest {
     pub body: Option<String>
 }
 
-impl Request for HttpRequest {}
+impl Request for HttpRequest {
+    fn is_valid(&self) -> bool {
+        todo!()  // TODO Implentation of the valid conditions of a request. 
+        // (Find it on a Router based on the path request? if matches a controller, that 
+        // condition will be OK, and
+        // has valid headers?) has valid http version?
+    }
+}
 
 impl HttpRequest {
     pub fn new<'a, T: NetworkStream>(stream: &'a mut T) -> Self {
@@ -121,7 +125,7 @@ impl HttpRequest {
     /// or better, into custom type, like body, so the return type of the method could be
     /// something like Option<Body<T>>
     fn parse_http_request_body<'b>(body: &'b str) -> Option<String> {
-        /// First, discard the non desired elemments
+        // First, discard the non desired elemments
         if body.starts_with("\0") || body.is_empty() { return None; }
         Some(body.to_string())
     }

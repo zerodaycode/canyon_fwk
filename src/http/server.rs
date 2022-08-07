@@ -1,13 +1,10 @@
-use std::{net::TcpListener, time::Instant};
-use super::events::HttpRequest;
-use crate::{CanyonConfig, core::net::NetworkStream};
+use std::net::TcpListener;
+use crate::CanyonConfig;
 
 /// The Canyon built-in http server.
 ///
 /// Supports up to HTTP 1.1 (2.0?) client-server connections
-pub struct HttpServer {
-
-}
+pub struct HttpServer;
 
 impl HttpServer {
     /// Constructor for the [`HttpServer`].
@@ -28,22 +25,9 @@ impl HttpServer {
         for stream in listener.incoming() {
             let stream = stream.unwrap(); // TODO Handle client error
             // TODO middleware for track and logging the hosts that make the requests (stream.peer_addr())
-            HttpServer::handle_connection(stream)
+            crate::core::net::handle_connection(stream)
+            // TODO Impl handle_connection on a trait, to specifically handle every event
         }
-    }
-
-    /// Convenient method to read the data coming from a Tcp event
-    /// 
-    /// TODO Generify this concept into an Struct, that it's associated fn
-    /// `handle_connection` receives objects that implements NetworkStream
-    fn handle_connection(mut stream: impl NetworkStream) {
-        let start = Instant::now();
-        let http_req = HttpRequest::new(&mut stream);
-        println!("Http request: {:?}\nElapsed: {:?}", &http_req, &start.elapsed());
-        // --------------------- RESPONSE EVENTS -----------------------------
-        let response = "HTTP/1.1 200 OK\r\n\r\n";
-        stream.write(response.as_bytes()).unwrap();
-        stream.flush().unwrap();
     }
 }
 

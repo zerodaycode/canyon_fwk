@@ -1,4 +1,4 @@
-use std::net::TcpListener;
+use std::{net::TcpListener, time::Instant};
 use super::events::HttpRequest;
 use crate::{CanyonConfig, core::net::NetworkStream};
 
@@ -37,8 +37,9 @@ impl HttpServer {
     /// TODO Generify this concept into an Struct, that it's associated fn
     /// `handle_connection` receives objects that implements NetworkStream
     fn handle_connection(mut stream: impl NetworkStream) {
+        let start = Instant::now();
         let http_req = HttpRequest::new(&mut stream);
-        println!("Http request: {:?}", http_req);
+        println!("Http request: {:?}\nElapsed: {:?}", &http_req, &start.elapsed());
         // --------------------- RESPONSE EVENTS -----------------------------
         let response = "HTTP/1.1 200 OK\r\n\r\n";
         stream.write(response.as_bytes()).unwrap();

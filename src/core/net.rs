@@ -16,10 +16,7 @@ pub trait Request {
 }
 
 
-/// Convenient method to read the data coming from a Tcp event
-/// 
-/// TODO Generify this concept into an Struct, that it's associated fn
-/// `handle_connection` receives objects that implements NetworkStream
+/// Convenient method to read the data coming from a Network event
 /// 
 /// The idea it's that, in the future, this will be the entry point for handle
 /// Http connections, udp connections...

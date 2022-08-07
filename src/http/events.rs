@@ -41,7 +41,7 @@ impl HttpRequest {
         
         // Take the first element on the iterator, that contains the verb, uri and http version of the request
         let (verb, uri, version) = Self::parse_verb_uri_version(Rc::clone(&rc));
-        // Then, we get (not consume) the last element on the request, that is the body of the Http request
+        // Then, we get (not consume) the last element on the stream, that is the body of the Http request
         let body = Self::parse_http_request_body(&only_read.last().unwrap());
         // Finally, we consume the intermediate elements, the remaining ones in the iterator
         let headers = Self::parse_http_request_headers(Rc::clone(&rc));

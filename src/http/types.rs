@@ -63,12 +63,12 @@ impl HttpVersion {
 
 
 #[derive(Debug, PartialEq)]
-pub struct Uri<'a> {
-    pub uri: &'a str
+pub struct Uri {
+    pub uri: String
 }
 
-impl<'a> Uri<'a> {
-    pub fn new(uri: &'a str) -> Self {
-        Self { uri: uri }
+impl Uri {
+    pub fn new<'a>(uri: &'a str) -> Self {
+        Self { uri: uri.to_string() }
     }
 }

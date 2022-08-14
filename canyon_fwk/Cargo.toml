@@ -1,0 +1,20 @@
+[package]
+name = "canyon_fwk"
+version = "0.1.0"
+edition = "2021"
+authors = ["Zero Day Code", "Alex Vergara <pyzyryab@tutanota.com>"]
+
+
+
+
+[dependencies]
+toml = "0.5.9"
+serde = { version = "1.0.138", features = ["derive"] }
+
+# Internal dependencies
+macros = { path = "../macros" }
+
+
+[dev-dependencies]
+# For testing the io:read + io:write events
+mockstream = "0.0.3"
